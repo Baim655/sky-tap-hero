@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Sky Tap Hero Responsive</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+  <style>
+    html, body {
+      margin: 0; padding: 0; overflow: hidden; height: 100%; background: black;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+<script>
+class MainMenu extends Phaser.Scene {
+  constructor() {
+    super({ key: 'MainMenu' });
+  }
+  preload() {
+    this.load.image('sky', 'https://labs.phaser.io/assets/skies/space3.png');
+  }
+  create() {
+    this.bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'sky').setDisplaySize(this.scale.width, this.scale.height);
+
+    this.title = this.add.text(this.scale.width / 2, this.scale.height * 0.15, "Sky Tap Hero", {
+      fontSize: '60px', color: '#ffffff', fontFamily: 'Verdana', stroke: '#000', strokeThickness: 6
+    }).setOrigin(0.5);
+
+    this.playButton = this.add.text(this.scale.width / 2, this.scale.height * 0.5, "Mulai Game", {
+      fontSize: '40px', color: '#ffcc00', fontFamily: 'Verdana', backgroundColor: '#333', padding: { x: 20, y: 10 }
+    }).setOrigin(0.5).setInteractive();
+
+    this.settingsButton = this.add.text(this.scale.width / 2, this.scale.height * 0.6, "Pengaturan", {
+      fontSize: '40px', color: '#ffffff', fontFamily: 'Verdana', backgroundColor: '#666', padding: { x: 20, y: 10 }
+    }).setOrigin(0.5).setInteractive();
+
+    this.playButton.on('pointerdown', () => this.scene.start('GameScene'));
+    this.settingsButton.on('pointerdown', () => this.scene.start('SettingsMenu'));
+
+    this.scale.on('resize', this.resize, this);
+  }
+  resize(gameSize) {
+    let width = gameSize.width;
+    let height = gameSize.height;
+
+    this.bg.setPosition(width / 2, height / 2);
+    this.bg.setDisplaySize(width, height);
+
+    this.title.setPosition(width / 2, height * 0.15);
+    this.playButton.setPosition(width / 2, height * 0.5);
+    this.settingsButton.setPosition(width / 2, height * 0.6);
+  }
+}
+
+class SettingsMenu extends Phaser.Scene {
+  constructor() {
+    super({ key: 'SettingsMenu' });
+  }
+  create() {
+    this.title = this.add.text(this.scale.width / 2, this.scale.height * 0.15, "Pengaturan", {
+      fontSize: '50px', color: '#ffffff', fontFamily: 'Verdana'
+    }).setOrigin(0.5);
+
+    this.backButton = this.add.text(this.scale.width / 2, this.scale.height * 0.85, "Kembali", {
+      fontSize: '32px', color: '#ffcc00', backgroundColor: '#444', padding: { x: 20, y: 10 }, fontFamily: 'Verdana'
+    }).setOrigin(0.5).setInteractive();
+
+    this.backButton.on('pointerdown', () => this.scene.start('MainMenu'));
+
+    this.scale.on('resize', this.resize, this);
+  }
+  resize(gameSize) {
+    let width = gameSize.width;
+    let height = gameSize.height;
+
+    this.title.setPosition(width / 2, height * 0.15);
+    this.backButton.setPosition(width / 2, height * 0.85);
+  }
+}
+
+class GameScene extends Phaser.Scene {
+  constructor() {
+    super({ key: 'GameScene' });
+  }
+
+  preload() {
+    this.load.image('sky', 'https://labs.phaser.io/assets/skies/space3.png');
+    this.load.image('plane', 'https://labs.phaser.io/assets/sprites/plane.png');
+    this.load.image('heart', 'https://cdn-icons-png.flaticon.com/512/833/833472.png');
+    this.load.image('coin', 'https://cdn-icons-png.flaticon.com/512/138/138292.png');
+  }
+
+  create() {
+  this.score = 0;
+  this.lives = 3;
+  this.invincible = false;
+  this.isGameOver = false;
+  this.scoredPipes = [];
+
+  this.bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'sky').setDisplaySize(this.scale.width, this.scale.height);
+
+  // Ganti bar grafik dengan bar biru transparan yang lebih bagus
+  this.hudBar = this.add.graphics();
+  this.hudBar.fillStyle(0x004080, 0.85); // warna biru tua transparan
+  this.hudBar.fillRoundedRect(10, 10, this.scale.width - 20, 60, 20);
+  this.hudBar.setDepth(10);
+
+  this.player = this.physics.add.sprite(150, this.scale.height / 2, 'plane');
+  this.player.setScale(2);
+  this.player.setCollideWorldBounds(false);
+  this.player.setBounce(0);
+  this.player.setDepth(5);
+
+  this.coinIcon = this.add.image(this.scale.width - 110, 40, 'coin').setScale(0.045).setOrigin(0.5).setDepth(11);
+
+  this.scoreText = this.add.text(this.scale.width - 80, 40, '0', {
+    fontFamily: 'Verdana',
+    fontSize: '32px',
+    color: '#ffcc00',
+    stroke: '#000',
+    strokeThickness: 4,
+  }).setOrigin(0, 0.5).setDepth(11);
+
+  this.hearts = [];
+  for (let i = 0; i < this.lives; i++) {
+    let heart = this.add.image(30 + i * 40, 40, 'heart').setScale(0.07).setDepth(11);
+    this.hearts.push(heart);
+  }
+
+  this.input.on('pointerdown', () => {
+    if (!this.isGameOver) this.player.setVelocityY(-350);
+  });
+  this.input.keyboard.on('keydown-SPACE', () => {
+    if (!this.isGameOver) this.player.setVelocityY(-350);
+  });
+
+  this.time.addEvent({ delay: 1500, callback: this.spawnWalls, callbackScope: this, loop: true });
+  this.scale.on('resize', this.resize, this);
+}
+
+  spawnWalls() {
+    if (this.isGameOver) return;
+
+    const pipeX = this.scale.width + 100;
+    const gapHeight = 220;
+    const holeY = Phaser.Math.Between(150, this.scale.height - 150 - gapHeight);
+    const lowerY = holeY + gapHeight;
+
+    const upperHeight = holeY;
+    const lowerHeight = this.scale.height - lowerY;
+
+    const upper = this.add.rectangle(pipeX, upperHeight / 2, 80, upperHeight, 0x007bff);
+    this.physics.add.existing(upper);
+    upper.body.setVelocityX(-250);
+    upper.body.setImmovable(true);
+    upper.body.setAllowGravity(false);
+
+    const lower = this.add.rectangle(pipeX, lowerY + lowerHeight / 2, 80, lowerHeight, 0x007bff);
+    this.physics.add.existing(lower);
+    lower.body.setVelocityX(-250);
+    lower.body.setImmovable(true);
+    lower.body.setAllowGravity(false);
+
+    this.scoredPipes.push({ upper, lower, scored: false });
+
+    this.physics.add.collider(this.player, upper, () => {
+      if (!this.invincible) this.loseLife();
+    });
+    this.physics.add.collider(this.player, lower, () => {
+      if (!this.invincible) this.loseLife();
+    });
+  }
+
+  update() {
+    if (!this.invincible && !this.isGameOver && (this.player.y > this.scale.height || this.player.y < 60)) {
+      this.loseLife();
+    }
+
+    this.scoredPipes.forEach(set => {
+      if (!set.scored && set.upper.x + 40 < this.player.x) {
+        this.score++;
+        this.scoreText.setText(this.score);
+        set.scored = true;
+      }
+    });
+  }
+
+  loseLife() {
+    if (this.invincible || this.isGameOver) return;
+    this.lives--;
+    this.invincible = true;
+
+    this.time.delayedCall(500, () => {
+      this.player.setPosition(150, this.scale.height / 2);
+      this.player.setVelocity(0, 0);
+    });
+
+    if (this.lives >= 0 && this.hearts[this.lives]) {
+      this.tweens.add({
+        targets: this.hearts[this.lives],
+        alpha: 0,
+        duration: 300,
+        onComplete: () => this.hearts[this.lives].setVisible(false)
+      });
+    }
+
+    this.time.addEvent({
+      delay: 100,
+      repeat: 9,
+      callback: () => this.player.setAlpha(this.player.alpha === 1 ? 0.3 : 1)
+    });
+
+    this.time.delayedCall(1000, () => {
+      this.player.setAlpha(1);
+      this.invincible = false;
+    });
+
+    if (this.lives <= 0) {
+      this.isGameOver = true;
+      this.time.delayedCall(1200, () => this.showGameOverUI());
+    }
+  }
+
+  showGameOverUI() {
+    this.add.rectangle(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 0x000000, 0.7).setDepth(20);
+    this.add.text(this.scale.width / 2, this.scale.height / 2 - 150, "Game Over", {
+      fontSize: '72px', color: '#ffffff', fontFamily: 'Verdana', stroke: '#000', strokeThickness: 8,
+    }).setOrigin(0.5).setDepth(21);
+
+    const createButton = (label, y, callback) => {
+      let btn = this.add.text(this.scale.width / 2, y, label, {
+        fontSize: '38px', fontFamily: 'Verdana', color: '#ffffff', backgroundColor: '#1e90ff',
+        padding: { x: 30, y: 15 }
+      }).setOrigin(0.5).setDepth(21).setInteractive({ useHandCursor: true });
+
+      btn.on('pointerover', () => btn.setStyle({ backgroundColor: '#3399ff' }));
+      btn.on('pointerout', () => btn.setStyle({ backgroundColor: '#1e90ff' }));
+      btn.on('pointerdown', callback);
+      return btn;
+    };
+
+    createButton("Mulai dari Awal", this.scale.height / 2 + 20, () => this.scene.restart());
+    createButton("Keluar", this.scale.height / 2 + 100, () => this.scene.start('MainMenu'));
+  }
+
+  resize(gameSize) {
+    if (!gameSize) return;
+    let width = gameSize.width;
+    let height = gameSize.height;
+
+    this.bg.setPosition(width / 2, height / 2);
+    this.bg.setDisplaySize(width, height);
+    this.scoreText.setPosition(width - 70, 30);
+    this.coinIcon.setPosition(width - 100, 30);
+    this.hearts.forEach((heart, i) => {
+      heart.setPosition(40 + i * 40, 30);
+    });
+  }
+}
+
+const config = {
+  type: Phaser.AUTO,
+  pixelArt: true,
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: window.innerWidth,
+    height: window.innerHeight,
+  },
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 800 },
+      debug: false
+    }
+  },
+  scene: [MainMenu, SettingsMenu, GameScene]
+};
+
+const game = new Phaser.Game(config);
+window.addEventListener('resize', () => {
+  game.scale.resize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
