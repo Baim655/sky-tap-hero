@@ -21,39 +21,82 @@ class MainMenu extends Phaser.Scene {
   constructor() {
     super({ key: 'MainMenu' });
   }
-  preload() {
-    this.load.image('sky', 'https://labs.phaser.io/assets/skies/space3.png');
-  }
-  create() {
-    this.bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'sky').setDisplaySize(this.scale.width, this.scale.height);
 
-    this.title = this.add.text(this.scale.width / 2, this.scale.height * 0.15, "Sky Tap Hero", {
-      fontSize: '60px', color: '#ffffff', fontFamily: 'Verdana', stroke: '#000', strokeThickness: 6
+  preload() {
+    this.load.image('shopIcon', 'https://cdn-icons-png.flaticon.com/512/1170/1170678.png');
+    this.load.image('sky', 'https://labs.phaser.io/assets/skies/space3.png');
+    this.load.image('logo', 'https://cdn-icons-png.flaticon.com/512/814/814513.png'); // ikon pesawat buat logo
+  }
+
+  create() {
+    // Background
+    this.bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'sky')
+      .setDisplaySize(this.scale.width, this.scale.height);
+
+    // Fade in effect
+    this.cameras.main.fadeIn(800, 0, 0, 0);
+
+    // Logo
+    this.logo = this.add.image(this.scale.width / 2, this.scale.height * 0.2, 'logo')
+      .setScale(0.25)
+      .setDepth(2);
+
+    // Title
+    this.title = this.add.text(this.scale.width / 2, this.scale.height * 0.35, "Sky Tap Hero", {
+      fontSize: '64px',
+      color: '#ffffff',
+      fontFamily: 'Verdana',
+      stroke: '#000',
+      strokeThickness: 6,
+      shadow: { offsetX: 3, offsetY: 3, color: '#000', blur: 4, fill: true }
     }).setOrigin(0.5);
 
-    this.playButton = this.add.text(this.scale.width / 2, this.scale.height * 0.5, "Mulai Game", {
-      fontSize: '40px', color: '#ffcc00', fontFamily: 'Verdana', backgroundColor: '#333', padding: { x: 20, y: 10 }
-    }).setOrigin(0.5).setInteractive();
+    const buttonStyle = {
+      fontSize: '36px',
+      fontFamily: 'Verdana',
+      backgroundColor: '#1e90ff',
+      color: '#ffffff',
+      padding: { x: 30, y: 15 },
+      stroke: '#000',
+      strokeThickness: 3
+    };
 
-    this.settingsButton = this.add.text(this.scale.width / 2, this.scale.height * 0.6, "Pengaturan", {
-      fontSize: '40px', color: '#ffffff', fontFamily: 'Verdana', backgroundColor: '#666', padding: { x: 20, y: 10 }
-    }).setOrigin(0.5).setInteractive();
+    // Tombol Play
+    this.playButton = this.add.text(this.scale.width / 2, this.scale.height * 0.55, "Mulai Game", buttonStyle)
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerover', () => this.playButton.setStyle({ backgroundColor: '#3399ff' }))
+      .on('pointerout', () => this.playButton.setStyle({ backgroundColor: '#1e90ff' }))
+      .on('pointerdown', () => this.scene.start('GameScene'));
 
-    this.playButton.on('pointerdown', () => this.scene.start('GameScene'));
-    this.settingsButton.on('pointerdown', () => this.scene.start('SettingsMenu'));
+    // Tombol Pengaturan
+    this.settingsButton = this.add.text(this.scale.width / 2, this.scale.height * 0.65, "Pengaturan", buttonStyle)
+      .setOrigin(0.5)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerover', () => this.settingsButton.setStyle({ backgroundColor: '#3399ff' }))
+      .on('pointerout', () => this.settingsButton.setStyle({ backgroundColor: '#1e90ff' }))
+      .on('pointerdown', () => this.scene.start('SettingsMenu'));
+
+    // Tombol Shop
+    this.shopButton = this.add.image(this.scale.width - 60, this.scale.height - 60, 'shopIcon')
+      .setScale(0.08)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(10)
+      .on('pointerdown', () => this.scene.start('ShopMenu'));
 
     this.scale.on('resize', this.resize, this);
   }
+
   resize(gameSize) {
     let width = gameSize.width;
     let height = gameSize.height;
 
-    this.bg.setPosition(width / 2, height / 2);
-    this.bg.setDisplaySize(width, height);
-
-    this.title.setPosition(width / 2, height * 0.15);
-    this.playButton.setPosition(width / 2, height * 0.5);
-    this.settingsButton.setPosition(width / 2, height * 0.6);
+    this.bg.setPosition(width / 2, height / 2).setDisplaySize(width, height);
+    this.logo.setPosition(width / 2, height * 0.2);
+    this.title.setPosition(width / 2, height * 0.35);
+    this.playButton.setPosition(width / 2, height * 0.55);
+    this.settingsButton.setPosition(width / 2, height * 0.65);
+    this.shopButton.setPosition(width - 60, height - 60);
   }
 }
 
@@ -61,25 +104,121 @@ class SettingsMenu extends Phaser.Scene {
   constructor() {
     super({ key: 'SettingsMenu' });
   }
+
   create() {
-    this.title = this.add.text(this.scale.width / 2, this.scale.height * 0.15, "Pengaturan", {
-      fontSize: '50px', color: '#ffffff', fontFamily: 'Verdana'
+    // Background semi transparan
+    this.add.rectangle(0, 0, this.scale.width * 2, this.scale.height * 2, 0x000000, 0.6).setOrigin(0);
+
+    // Judul
+    this.title = this.add.text(this.scale.width / 2, this.scale.height * 0.1, "Pengaturan", {
+      fontSize: '60px',
+      color: '#ffffff',
+      fontFamily: 'Verdana',
+      stroke: '#000',
+      strokeThickness: 8
     }).setOrigin(0.5);
 
-    this.backButton = this.add.text(this.scale.width / 2, this.scale.height * 0.85, "Kembali", {
-      fontSize: '32px', color: '#ffcc00', backgroundColor: '#444', padding: { x: 20, y: 10 }, fontFamily: 'Verdana'
-    }).setOrigin(0.5).setInteractive();
+    // Suara
+    this.soundOn = true;
+    this.soundLabel = this.add.text(this.scale.width / 2, this.scale.height * 0.25, "Suara: ON", {
+      fontSize: '32px',
+      color: '#ffcc00',
+      backgroundColor: '#444',
+      fontFamily: 'Verdana',
+      padding: { x: 25, y: 12 },
+      fixedWidth: 200,
+      align: 'center'
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    this.soundLabel.on('pointerdown', () => {
+      this.soundOn = !this.soundOn;
+      this.soundLabel.setText(`Suara: ${this.soundOn ? "ON" : "OFF"}`);
+      // Tambahkan logika aktif/nonaktifkan suara di sini
+    });
+
+    // Musik
+    this.musicOn = true;
+    this.musicLabel = this.add.text(this.scale.width / 2, this.scale.height * 0.38, "Musik: ON", {
+      fontSize: '32px',
+      color: '#ffcc00',
+      backgroundColor: '#444',
+      fontFamily: 'Verdana',
+      padding: { x: 25, y: 12 },
+      fixedWidth: 200,
+      align: 'center'
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    this.musicLabel.on('pointerdown', () => {
+      this.musicOn = !this.musicOn;
+      this.musicLabel.setText(`Musik: ${this.musicOn ? "ON" : "OFF"}`);
+      // Tambahkan logika aktif/nonaktifkan musik di sini
+    });
+
+    // Bahasa
+    this.languages = ['Indonesia', 'English'];
+    this.currentLangIndex = 0;
+    this.languageLabel = this.add.text(this.scale.width / 2, this.scale.height * 0.51, `Bahasa: ${this.languages[this.currentLangIndex]}`, {
+      fontSize: '32px',
+      color: '#ffcc00',
+      backgroundColor: '#444',
+      fontFamily: 'Verdana',
+      padding: { x: 10, y: 12 },
+      fixedWidth: 300,
+      align: 'center'
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    this.languageLabel.on('pointerdown', () => {
+      this.currentLangIndex = (this.currentLangIndex + 1) % this.languages.length;
+      this.languageLabel.setText(`Bahasa: ${this.languages[this.currentLangIndex]}`);
+      // Tambahkan logika ubah bahasa game di sini
+    });
+
+    // Reset Data
+    this.resetBtn = this.add.text(this.scale.width / 2, this.scale.height * 0.65, "Reset Data Game", {
+      fontSize: '32px',
+      color: '#ffffff',
+      backgroundColor: '#d9534f',
+      fontFamily: 'Verdana',
+      padding: { x: 10, y: 15 },
+      fixedWidth: 300,
+      align: 'center'
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    this.resetBtn.on('pointerdown', () => {
+      if (confirm("Yakin ingin reset semua data game?")) {
+        // Contoh reset data:
+        localStorage.clear(); // jika data game disimpan di localStorage
+        this.scene.start('MainMenu');
+      }
+    });
+
+    // Tombol kembali
+    this.backButton = this.add.text(this.scale.width / 2, this.scale.height * 0.82, "Kembali ke Menu", {
+      fontSize: '36px',
+      color: '#ffffff',
+      backgroundColor: '#1e90ff',
+      fontFamily: 'Verdana',
+      padding: { x: 10, y: 15 },
+      fixedWidth: 320,
+      align: 'center'
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
     this.backButton.on('pointerdown', () => this.scene.start('MainMenu'));
 
+    // Resize responsif
     this.scale.on('resize', this.resize, this);
   }
+
   resize(gameSize) {
     let width = gameSize.width;
     let height = gameSize.height;
 
-    this.title.setPosition(width / 2, height * 0.15);
-    this.backButton.setPosition(width / 2, height * 0.85);
+    this.title.setPosition(width / 2, height * 0.1);
+    this.soundLabel.setPosition(width / 2, height * 0.25);
+    this.musicLabel.setPosition(width / 2, height * 0.38);
+    this.languageLabel.setPosition(width / 2, height * 0.51);
+    this.resetBtn.setPosition(width / 2, height * 0.65);
+    this.backButton.setPosition(width / 2, height * 0.82);
   }
 }
 
@@ -97,16 +236,17 @@ class GameScene extends Phaser.Scene {
 
   create() {
   this.score = 0;
+  this.highScore = parseInt(localStorage.getItem('highScore')) || 0;
   this.lives = 3;
   this.invincible = false;
   this.isGameOver = false;
   this.scoredPipes = [];
 
-  this.bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'sky').setDisplaySize(this.scale.width, this.scale.height);
+  this.bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'sky')
+    .setDisplaySize(this.scale.width, this.scale.height);
 
-  // Ganti bar grafik dengan bar biru transparan yang lebih bagus
   this.hudBar = this.add.graphics();
-  this.hudBar.fillStyle(0x004080, 0.85); // warna biru tua transparan
+  this.hudBar.fillStyle(0x004080, 0.85);
   this.hudBar.fillRoundedRect(10, 10, this.scale.width - 20, 60, 20);
   this.hudBar.setDepth(10);
 
@@ -116,7 +256,8 @@ class GameScene extends Phaser.Scene {
   this.player.setBounce(0);
   this.player.setDepth(5);
 
-  this.coinIcon = this.add.image(this.scale.width - 110, 40, 'coin').setScale(0.045).setOrigin(0.5).setDepth(11);
+  this.coinIcon = this.add.image(this.scale.width - 110, 40, 'coin')
+    .setScale(0.045).setOrigin(0.5).setDepth(11);
 
   this.scoreText = this.add.text(this.scale.width - 80, 40, '0', {
     fontFamily: 'Verdana',
@@ -125,6 +266,14 @@ class GameScene extends Phaser.Scene {
     stroke: '#000',
     strokeThickness: 4,
   }).setOrigin(0, 0.5).setDepth(11);
+
+  this.highScoreText = this.add.text(20, 70, `High Score: ${this.highScore}`, {
+    fontFamily: 'Verdana',
+    fontSize: '20px',
+    color: '#ffffff',
+    stroke: '#000',
+    strokeThickness: 3,
+  }).setDepth(11);
 
   this.hearts = [];
   for (let i = 0; i < this.lives; i++) {
@@ -135,6 +284,7 @@ class GameScene extends Phaser.Scene {
   this.input.on('pointerdown', () => {
     if (!this.isGameOver) this.player.setVelocityY(-350);
   });
+
   this.input.keyboard.on('keydown-SPACE', () => {
     if (!this.isGameOver) this.player.setVelocityY(-350);
   });
@@ -183,70 +333,110 @@ class GameScene extends Phaser.Scene {
 
     this.scoredPipes.forEach(set => {
       if (!set.scored && set.upper.x + 40 < this.player.x) {
-        this.score++;
-        this.scoreText.setText(this.score);
-        set.scored = true;
-      }
+  this.score++;
+  this.scoreText.setText(this.score);
+  set.scored = true;
+
+  // Cek dan simpan high score segera setelah score naik
+  if (this.score > this.highScore) {
+    this.highScore = this.score;
+    localStorage.setItem('highScore', this.highScore);
+    this.highScoreText.setText(`High Score: ${this.highScore}`);
+  }
+}
     });
   }
 
   loseLife() {
-    if (this.invincible || this.isGameOver) return;
-    this.lives--;
-    this.invincible = true;
+  if (this.invincible || this.isGameOver) return;
 
-    this.time.delayedCall(500, () => {
-      this.player.setPosition(150, this.scale.height / 2);
-      this.player.setVelocity(0, 0);
-    });
+  this.lives--;
+  // Update tampilan hati sesuai nyawa
+for (let i = 0; i < this.hearts.length; i++) {
+  this.hearts[i].setVisible(i < this.lives);
+}
+  this.invincible = true;
 
-    if (this.lives >= 0 && this.hearts[this.lives]) {
-      this.tweens.add({
-        targets: this.hearts[this.lives],
-        alpha: 0,
-        duration: 300,
-        onComplete: () => this.hearts[this.lives].setVisible(false)
-      });
+  this.time.delayedCall(500, () => {
+    this.player.setPosition(150, this.scale.height / 2);
+    this.player.setVelocity(0, 0);
+  });
+
+  if (this.lives <= 0) {
+    this.isGameOver = true;
+
+    // Simpan high score jika lebih tinggi
+    if (this.score > this.highScore) {
+      this.highScore = this.score;
+      localStorage.setItem('highScore', this.highScore);
     }
 
-    this.time.addEvent({
-      delay: 100,
-      repeat: 9,
-      callback: () => this.player.setAlpha(this.player.alpha === 1 ? 0.3 : 1)
-    });
-
-    this.time.delayedCall(1000, () => {
-      this.player.setAlpha(1);
-      this.invincible = false;
-    });
-
-    if (this.lives <= 0) {
-      this.isGameOver = true;
-      this.time.delayedCall(1200, () => this.showGameOverUI());
-    }
+    this.time.delayedCall(1200, () => this.showGameOverUI());
   }
+
+  this.time.addEvent({
+    delay: 100,
+    repeat: 9,
+    callback: () => this.player.setAlpha(this.player.alpha === 1 ? 0.3 : 1)
+  });
+
+  this.time.delayedCall(1000, () => {
+    this.player.setAlpha(1);
+    this.invincible = false;
+  });
+}
 
   showGameOverUI() {
-    this.add.rectangle(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 0x000000, 0.7).setDepth(20);
-    this.add.text(this.scale.width / 2, this.scale.height / 2 - 150, "Game Over", {
-      fontSize: '72px', color: '#ffffff', fontFamily: 'Verdana', stroke: '#000', strokeThickness: 8,
-    }).setOrigin(0.5).setDepth(21);
+  // Background hitam transparan
+  this.add.rectangle(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 0x000000, 0.7).setDepth(20);
 
-    const createButton = (label, y, callback) => {
-      let btn = this.add.text(this.scale.width / 2, y, label, {
-        fontSize: '38px', fontFamily: 'Verdana', color: '#ffffff', backgroundColor: '#1e90ff',
-        padding: { x: 30, y: 15 }
-      }).setOrigin(0.5).setDepth(21).setInteractive({ useHandCursor: true });
+  // Teks GAME OVER
+  this.add.text(this.scale.width / 2, this.scale.height / 2 - 140, "GAME OVER", {
+    fontSize: '64px',
+    color: '#ff4444',
+    fontFamily: 'Verdana',
+    stroke: '#000000',
+    strokeThickness: 8,
+    shadow: { offsetX: 4, offsetY: 4, color: '#000', blur: 4, fill: true }
+  }).setOrigin(0.5).setDepth(21);
 
-      btn.on('pointerover', () => btn.setStyle({ backgroundColor: '#3399ff' }));
-      btn.on('pointerout', () => btn.setStyle({ backgroundColor: '#1e90ff' }));
-      btn.on('pointerdown', callback);
-      return btn;
-    };
+  // Teks Skor
+  this.add.text(this.scale.width / 2, this.scale.height / 2 - 60, `Skor: ${this.score}`, {
+    fontSize: '40px',
+    color: '#ffffff',
+    fontFamily: 'Verdana',
+    stroke: '#000',
+    strokeThickness: 3,
+  }).setOrigin(0.5).setDepth(21);
 
-    createButton("Mulai dari Awal", this.scale.height / 2 + 20, () => this.scene.restart());
-    createButton("Keluar", this.scale.height / 2 + 100, () => this.scene.start('MainMenu'));
-  }
+  // High Score - tampil di bawah skor
+  this.add.text(this.scale.width / 2, this.scale.height / 2 - 10, `Skor Tertinggi: ${this.highScore}`, {
+    fontSize: '30px',
+    color: '#ffff66',
+    fontFamily: 'Verdana',
+    stroke: '#000',
+    strokeThickness: 2,
+  }).setOrigin(0.5).setDepth(21);
+
+  // Tombol
+  const createButton = (label, y, callback) => {
+    let btn = this.add.text(this.scale.width / 2, y, label, {
+      fontSize: '36px',
+      fontFamily: 'Verdana',
+      color: '#ffffff',
+      backgroundColor: '#007bff',
+      padding: { x: 30, y: 15 },
+      borderRadius: 10,
+    }).setOrigin(0.5).setDepth(21).setInteractive({ useHandCursor: true });
+
+    btn.on('pointerover', () => btn.setStyle({ backgroundColor: '#3399ff' }));
+    btn.on('pointerout', () => btn.setStyle({ backgroundColor: '#007bff' }));
+    btn.on('pointerdown', callback);
+  };
+
+  createButton("Main Lagi", this.scale.height / 2 + 60, () => this.scene.restart());
+  createButton("Kembali ke Menu", this.scale.height / 2 + 140, () => this.scene.start('MainMenu'));
+}
 
   resize(gameSize) {
     if (!gameSize) return;
@@ -286,6 +476,49 @@ const game = new Phaser.Game(config);
 window.addEventListener('resize', () => {
   game.scale.resize(window.innerWidth, window.innerHeight);
 });
+class ShopMenu extends Phaser.Scene {
+  constructor() {
+    super({ key: 'ShopMenu' });
+  }
+
+  create() {
+    this.add.text(this.scale.width / 2, this.scale.height / 2 - 100, 'Toko Pesawat', {
+      fontSize: '48px',
+      color: '#ffcc00',
+      fontFamily: 'Verdana',
+      stroke: '#000',
+      strokeThickness: 6
+    }).setOrigin(0.5);
+
+    const backBtn = this.add.text(this.scale.width / 2, this.scale.height - 100, 'Kembali', {
+      fontSize: '32px',
+      color: '#ffffff',
+      backgroundColor: '#333',
+      padding: { x: 20, y: 10 },
+      fontFamily: 'Verdana'
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+    backBtn.on('pointerdown', () => this.scene.start('MainMenu'));
+
+    this.scale.on('resize', this.resize, this);
+  }
+
+  resize(gameSize) {
+    if (!gameSize) return;
+    const width = gameSize.width;
+    const height = gameSize.height;
+
+    this.children.each(child => {
+      if (child.setPosition) {
+        if (child.text === 'Toko Pesawat') {
+          child.setPosition(width / 2, height / 2 - 100);
+        } else if (child.text === 'Kembali') {
+          child.setPosition(width / 2, height - 100);
+        }
+      }
+    });
+  }
+}
 </script>
 </body>
 </html>
